@@ -30,10 +30,9 @@ public class SimplePlayer : NetworkBehaviour
         if (!isLocalPlayer)
         {
             gameObject.tag = "Enemy";
-            Material newMat = Resources.Load<Material>("Materials/Enemy");
+            Material newMat = Resources.Load<Material>("Materials/Enemy"); // Get Red material from project folder
             gameObject.GetComponent<MeshRenderer>().material = newMat;
         }
-
     }
 
 
@@ -62,8 +61,7 @@ public class SimplePlayer : NetworkBehaviour
     public void Hit()
     {
         gameObject.SetActive(false);
-        gameObject.transform.position = respawnPosition;
-        StartCoroutine(Respawn());
+        Invoke(nameof(Respawn), timeToRespawn);
         if (debug) Debug.Log(gameObject.name + " hase been hit.");
     }
 
@@ -71,6 +69,7 @@ public class SimplePlayer : NetworkBehaviour
     private void Shoot()
     {
         var bullet = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
+        if (debug) bullet.GetComponent<Bullet>().debug = true;
         NetworkServer.Spawn(bullet);
         bullet.GetComponent<Rigidbody>().AddForce(TowardsEnemy() * bulletForce, ForceMode.Impulse);
         StartCoroutine(ReadyShot());
@@ -84,10 +83,9 @@ public class SimplePlayer : NetworkBehaviour
         shotReady = true;
     }
 
-    private IEnumerator Respawn()
-    {     
-        yield return new WaitForSeconds(timeToRespawn);
-
+    private void Respawn()
+    {
+        gameObject.transform.position = respawnPosition;
         gameObject.SetActive(true);
     }
 
